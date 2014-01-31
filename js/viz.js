@@ -51,9 +51,13 @@ var loadLifeExpectancy = function() {
 
 /* The data is loaded at this point. */
 var dataIsLoaded = function() {
-  console.log("All data loaded.", players);
+  console.log("All data loaded.");
+  makeDOMRepresentation();
+};
 
-  /* Draw to DOM */
+/* Draw the table to the DOM. */
+var makeDOMRepresentation = function() {
+  /* Using a string is the fastest way, especially with lots of data */
   var DOMRepresentation = "<table class='table table-striped'><thead><th>Name</th><th>Born</th><th>Died</th><th>Expectancy</th></thead><tbody>";
   for (var i = 0; i < players.length; i++) {
     DOMRepresentation += "<tr><td>" + players[i].name + "</td><td>" + players[i].birthYear + "</td><td>" + players[i].deathYear + "</td><td>" + players[i].lifeExpectancy + "</td></tr>";
@@ -68,10 +72,7 @@ var dataIsLoaded = function() {
   document.getElementById("message").style.display = "none";
 };
 
-/* Run once the DOM is ready. */
-var init = function() {
-  loadPlayerData();
-};
-
 /* Add listener to load data on content ready */
-window.addEventListener("DOMContentLoaded", init, false);
+window.addEventListener("DOMContentLoaded", function() {
+  loadPlayerData();
+}, false);
