@@ -52,15 +52,27 @@ var loadLifeExpectancy = function() {
 /* The data is loaded at this point. */
 var dataIsLoaded = function() {
   console.log("All data loaded.");
+  calculate();
   makeDOMRepresentation();
+};
+
+/* Calculate the difference between how long a player lived and their life expectancy based on their birth year. */
+var points = new Array();
+var calculate = function(){
+  for(var i = 0 ; i < players.length; i++){
+    var p = new Array();
+    p.push(players[i].birthYear);
+    p.push(players[i].deathAge - players[i].lifeExpectancy);
+    points.push(p);
+  }
 };
 
 /* Draw the table to the DOM. */
 var makeDOMRepresentation = function() {
   /* Using a string is the fastest way, especially with lots of data */
-  var DOMRepresentation = "<table class='table table-striped'><thead><th>Name</th><th>Born</th><th>Died</th><th>Expectancy</th></thead><tbody>";
+  var DOMRepresentation = "<table class='table table-striped'><thead><th>Name</th><th>Born</th><th>Died</th><th>Expectancy</th><th> Age at Death</th></thead><tbody>";
   for (var i = 0; i < players.length; i++) {
-    DOMRepresentation += "<tr><td>" + players[i].name + "</td><td>" + players[i].birthYear + "</td><td>" + players[i].deathYear + "</td><td>" + players[i].lifeExpectancy + "</td></tr>";
+    DOMRepresentation += "<tr><td>" + players[i].name + "</td><td>" + players[i].birthYear + "</td><td>" + players[i].deathYear + "</td><td>" + players[i].lifeExpectancy + "</td><td>" + players[i].deathAge + "</td></tr>";
   }
   DOMRepresentation += "</tbody></table>";
   var tableWrapper = document.createElement("div");
