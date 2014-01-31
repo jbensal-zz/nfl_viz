@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>NFL Deaths and LifeSpans</title>
+        <script type="text/javascript" src="d3/d3.js"></script>
+        <script type="text/javascript" src="d3/d3.min.js"></script>
+        <script src="http://d3js.org/queue.v1.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            //beautiful D3 code will go here
+
+            function fillPlayer(player){
+            	var player_filledIn = {
+//            		number: player.number,
+            		actual_name: player.actual_name,
+//            		position_type: player.position_type,
+            		death_year: +player.death_year,
+//            		deathdate: player.deathdate,
+//   	        	death_location: player.death_location,
+            		death_age: +player.death_age,
+//            		era_name: player.era_name,
+//            		birthdate: player.birthdate,
+            		birth_year: +player.birth_year
+            	};
+            	players.push(player_filledIn);
+            }; // end function
+
+            var players = new Array(); // array of all the players
+            var lives = {};				// dictionary of years and life expectancies
+            
+            d3.csv("nfl_player_data.csv", fillPlayer
+            , function(error, rows) {
+        		console.log(rows);
+            });
+
+            d3.csv("life_expectancy.csv", function(data) {
+            	lives[data.year] = parseFloat(data.male_life_expectancy);
+            }, function(error, rows) {
+            		console.log(rows);
+            });
+		
+			// iterate through the players, populate their expected life expectancy, and calculate the difference between their actual age @ death and expected age.
+			var points = new Array();
+			var count = 0;
+			for (var i = 0; i <= players.length; i+=1){
+//				var p = new Array();
+				count+= 1;
+			};
+			console.log(players.length);
+//			lives[players[i].birth_year] = expected life length
+// 			players[i].death_age = actual age at death
+
+        </script>
+    </body>
+</html>     
