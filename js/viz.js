@@ -100,7 +100,7 @@ var init = function() {
     }
   }, false);
   loadPlayerData();
-}
+};
 
 /* Add listener to load data on content ready */
 window.addEventListener("DOMContentLoaded", init, false);
