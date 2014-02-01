@@ -8,9 +8,28 @@
         <script src="js/viz.js"></script>
     </head>
     <body>
+
+
+      
       <div class="container" id="wrap">
         <h1>D3 NFL visualization</h1>
+        <button id='button' value='hide/show'/> Hide/Show</button>
         <div id="message"><h3>Loading data&hellip;</h3></div>
       </div>
+
+        <script>
+        var button = document.getElementById('button'); // Assumes element with id='button'
+
+        button.onclick = function() {
+            var div = document.getElementById('js-table-data');
+            if (div.style.display !== 'none') {
+                div.style.display = 'none';
+            }
+            else {
+                div.style.display = 'block';
+            }
+        };
+        </script>
+
     </body>
 </html>     
