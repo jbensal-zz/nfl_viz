@@ -53,6 +53,7 @@ var loadLifeExpectancy = function() {
 var dataIsLoaded = function() {
   console.log('All data loaded.');
   calculate();
+  makeDOMRepresentation();
 };
 
 /* Calculate the difference between how long a player lived and their life expectancy based on their birth year. */
