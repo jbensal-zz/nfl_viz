@@ -53,7 +53,6 @@ var loadLifeExpectancy = function() {
 var dataIsLoaded = function() {
   console.log('All data loaded.');
   calculate();
-  makeDOMRepresentation();
 };
 
 /* Calculate the difference between how long a player lived and their life expectancy based on their birth year. */
@@ -66,6 +65,27 @@ var calculate = function(){
     points.push(p);
   }
 };
+
+/* Make a scatterplot graph 
+var makeGraph = function(){
+  var svg = d3.select("body")
+            .append("svg")
+            .attr("width", 500)
+            .attr("height", 100);
+
+  svg.selectAll("circle")
+   .data(points)
+   .enter()
+   .append("circle")
+   .attr("cx", function(d) {
+        return d[0];
+   })
+   .attr("cy", function(d) {
+        return d[1];
+   })
+   .attr("r", 2);
+};
+*/
 
 /* Draw the table to the DOM. */
 var makeDOMRepresentation = function() {
