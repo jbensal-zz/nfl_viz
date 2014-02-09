@@ -6,6 +6,9 @@
 
 /* Data storage */
 var players = new Array(); // array of all the players
+var margin = {top: 20, right: 40, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
 
 /* Load in the player data */
 var loadPlayerData = function() {
@@ -52,41 +55,86 @@ var loadLifeExpectancy = function() {
 /* The data is loaded at this point. */
 var dataIsLoaded = function() {
   console.log('All data loaded.');
-  calculate();
+  makeGraph();
   makeDOMRepresentation();
 };
 
-/* Calculate the difference between how long a player lived and their life expectancy based on their birth year. */
-var points = new Array();
-var calculate = function(){
-  for(var i = 0 ; i < players.length; i++){
-    var p = new Array();
-    p.push(players[i].birthYear);
-    p.push(players[i].deathAge - players[i].lifeExpectancy);
-    points.push(p);
-  }
-};
-
-/* Make a scatterplot graph 
+/* Make a scatterplot graph */
 var makeGraph = function(){
+  
+  // set up X
+  var xValue = function(p){
+    return p.birthYear;
+  };
+
+  var xScale = d3.scale.linear().range([0,width]);
+
+  var xMap = function(p){
+      return xScale(xValue(p));
+  };
+
+  var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+  // set up Y
+  var yValue = function(p){
+    return p.deathAge - p.lifeExpectancy;
+  };
+
+  var yScale = d3.scale.linear().range([0, height]);
+
+  var yMap = function(p){
+      return yScale(yValue(p));
+  };
+
+  var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+// draw on SVG
   var svg = d3.select("body")
             .append("svg")
-            .attr("width", 500)
-            .attr("height", 100);
+            .attr("width", width + margin.right + margin.left)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  svg.selectAll("circle")
-   .data(points)
+  // avoid overlap between dots and axis
+  xScale.domain([d3.min(players, xValue)-1, d3.max(players, xValue)+1]);
+  yScale.domain([d3.min(players, yValue)-1, d3.max(players, yValue)+1]);
+
+  // x-axis
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Time");
+
+  // y-axis
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Deviation from mean");
+
+  // draw circles    
+  svg.selectAll(".dot")
+   .data(players)
    .enter()
    .append("circle")
-   .attr("cx", function(d) {
-        return d[0];
-   })
-   .attr("cy", function(d) {
-        return d[1];
-   })
-   .attr("r", 2);
+   .attr("class", "dot")
+   .attr("r", 2)
+   .attr("cx", xMap)
+   .attr("cy", yMap);
 };
-*/
+
 
 /* Draw the table to the DOM. */
 var makeDOMRepresentation = function() {
