@@ -6,25 +6,46 @@
 
 /* Data storage */
 var players = new Array(); // array of all the players
+var draftPlayers = new Array(); // array of players with college/draft data
 var margin = {top: 20, right: 40, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    width = 1060 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
 
 /* Load in the player data */
 var loadPlayerData = function() {
-  d3.csv('data/nfl_player_data.csv', function (player) {
+  d3.csv('data/all_dead_nfl_player_metadata.csv', function (player) {
     /* Needed to filter out players born before 1900 because don't have
      * life expectancy data for them. */
     if (player.birth_year < 1900) return;
-
     /* Fill in the player info */
     var playerInfo = {
       name: player.actual_name,
       deathYear: +player.death_year,
       deathAge: +player.death_age,
-      birthYear: +player.birth_year
+      birthYear: +player.birth_year, 
+      college: player.college,
+      draftYear: +players.draft_year,
+      draftRound: +players.draft_round,
+      draftPick: +players.draft_pick,
+      position: player.position_type
     };
     players.push(playerInfo);
+
+    if (player.draft_pick != "NA"){
+      console.log(player.actual_name);
+
+      var playerInfo2 = {
+        name: player.actual_name,
+        college: player.college,
+        draftYear: +players.draft_year,
+        draftRound: +players.draft_round,
+        draftPick: +players.draft_pick,
+        position: player.position_type
+      };
+
+      draftPlayers.push(playerInfo2);
+    } // end if
+
   }, function(error, rows) {
     /* Player data is loaded */
     if (error) {
@@ -59,7 +80,7 @@ var dataIsLoaded = function() {
   makeDOMRepresentation();
 };
 
-/* Make a scatterplot graph */
+/* Make a scatterplot graph for the life expectancies*/
 var makeGraph = function(){
   
   // set up X
@@ -80,7 +101,7 @@ var makeGraph = function(){
     return p.deathAge - p.lifeExpectancy;
   };
 
-  var yScale = d3.scale.linear().range([0, height]);
+  var yScale = d3.scale.linear().range([height, 0]);
 
   var yMap = function(p){
       return yScale(yValue(p));
