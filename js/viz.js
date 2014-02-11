@@ -6,7 +6,9 @@
 
 /* Data storage */
 var players = new Array(); // array of all the players
-var draftPlayers = new Array(); // array of players with college/draft data
+var playersPos = {};
+var playersPosArr = [];
+
 var margin = {top: 20, right: 40, bottom: 30, left: 40},
     width = 1060 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
@@ -24,32 +26,42 @@ var loadPlayerData = function() {
       deathAge: +player.death_age,
       birthYear: +player.birth_year, 
       college: player.college,
-      draftYear: +players.draft_year,
-      draftRound: +players.draft_round,
-      draftPick: +players.draft_pick,
+      draftYear: +player.draft_year,
+      draftRound: +player.draft_round,
+      draftPick: +player.draft_pick,
       position: player.position_type
     };
     players.push(playerInfo);
 
-    if (player.draft_pick != "NA"){
-      console.log(player.actual_name);
-
-      var playerInfo2 = {
-        name: player.actual_name,
-        college: player.college,
-        draftYear: +players.draft_year,
-        draftRound: +players.draft_round,
-        draftPick: +players.draft_pick,
-        position: player.position_type
-      };
-
-      draftPlayers.push(playerInfo2);
+    if (player.position_type != "NA" && player.height_inches != "NA" && player.weight != "NA"){
+//      weight (lb) / [height (in)]2 x 703
+      var bmi = +player.weight / Math.pow(+player.height_inches, 2) * 703;
+      if (playersPos[player.position_type] == undefined) {
+        playersPos[player.position_type] = {
+          count: 0,
+          total: bmi,
+          avg: function() {
+            if (this.count == 0) return 0;
+            return this.total / this.count;
+          }
+        };
+      } else {
+        playersPos[player.position_type].count++;
+        playersPos[player.position_type].total += bmi;
+      }
     } // end if
 
   }, function(error, rows) {
     /* Player data is loaded */
     if (error) {
       console.log('Error loading player data: ', error);
+    }
+    for (var i in playersPos) {
+      var newObj = {
+        pos: i,
+        avg: playersPos[i].avg()
+      }
+      playersPosArr.push(newObj);
     }
     loadLifeExpectancy();
   });
@@ -77,6 +89,7 @@ var loadLifeExpectancy = function() {
 var dataIsLoaded = function() {
   console.log('All data loaded.');
   makeGraph();
+  makeSecondGraph();
   makeDOMRepresentation();
 };
 
@@ -163,7 +176,7 @@ var makeSecondGraph = function(){
     height = 500 - margin.top - margin.bottom;
 
   var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .1);
+    .rangeRoundBands([0, width], 1);
 
   var y = d3.scale.linear()
     .range([height, 0]);
@@ -175,13 +188,42 @@ var makeSecondGraph = function(){
   var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
-    .ticks(10, "%");
+    .ticks(10, "");
 
   var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
-  .append("g")
+    .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  x.domain(playersPosArr.map(function(d) { return d.pos }));
+  y.domain([0, d3.max(playersPosArr, function(d) { return d.avg; })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+      .append("text")
+      .text("Position");
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Average BMI");
+
+  svg.selectAll(".bar")
+      .data(playersPosArr)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.pos); })
+      .attr("width", 10)
+      .attr("y", function(d) { return y(d.avg); })
+      .attr("height", function(d) { return height - y(d.avg); });
 };
 
 
@@ -196,6 +238,7 @@ var makeDOMRepresentation = function() {
   var tableWrapper = document.createElement('div');
   tableWrapper.id = 'js-table-data';
   tableWrapper.innerHTML = DOMRepresentation;
+  tableWrapper.style.display = "none";
   document.getElementById('wrap').appendChild(tableWrapper);
   /* Hide loading message */
   document.getElementById('message').style.display = 'none';
