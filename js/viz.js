@@ -29,7 +29,8 @@ var loadPlayerData = function() {
       draftYear: +player.draft_year,
       draftRound: +player.draft_round,
       draftPick: +player.draft_pick,
-      position: player.position_type
+      position: player.position_type,
+      plocation: player.positon_location
     };
     players.push(playerInfo);
 
@@ -90,6 +91,7 @@ var dataIsLoaded = function() {
   console.log('All data loaded.');
   makeGraph();
   makeSecondGraph();
+  makeThirdGraph();
   makeDOMRepresentation();
 };
 
@@ -226,6 +228,82 @@ var makeSecondGraph = function(){
       .attr("height", function(d) { return height - y(d.avg); });
 };
 
+makeThirdGraph = function(){
+  var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+  var xScale = d3.scale.ordinal()
+  .rangeRoundBands([0, width], 1);
+
+  var yScale = d3.scale.linear()
+  .range([height, 0]);
+
+  // set up X-value
+  var xValue = function(p){
+    return p.position;
+  };
+
+  // set up Y-value
+  var yValue = function(p){
+    return p.deathAge;
+  };
+
+  var xMap = function(p){
+    return xScale(xValue(p));
+  }
+
+  var yMap = function(p){
+      return yScale(yValue(p));
+  };
+
+  var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .orient("bottom");
+
+  var yAxis = d3.svg.axis()
+    .scale(yScale)
+    .orient("left")
+    .ticks(10, "");
+
+  var svg = d3.select("body").append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// domain info
+ xScale.domain(players.map(function(p) { return p.position }));
+ yScale.domain([0, d3.max(players, function(p) { return p.deathAge; })]);
+
+  svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis)
+    .append("text")
+    .text("Position");
+
+  svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+  .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("Death Age");
+
+  // draw circles    
+  svg.selectAll(".dot2")
+   .data(players)
+   .enter()
+   .append("circle")
+   .attr("class", "dot2")
+   .attr("r", 2)
+   .attr("cx", xMap)
+   .attr("cy", yMap);
+
+};
 
 /* Draw the table to the DOM. */
 var makeDOMRepresentation = function() {
